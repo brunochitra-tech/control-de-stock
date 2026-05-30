@@ -1871,6 +1871,15 @@ code, .mono {
     line-height: 1.2;
 }
 
+.greeting-quote {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--bone-dim);
+    letter-spacing: 0.04em;
+    margin-top: var(--space-2);
+    line-height: 1.6;
+}
+
 /* ============ MANUAL ENTRY ============ */
 .manual-entry-block {
     margin-top: var(--space-7);
