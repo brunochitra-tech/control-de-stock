@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STOCK · Bitácora de ventas</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..900,0..100&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="grain" aria-hidden="true"></div>
+
+    <div class="app">
+        <!-- ============ SIDEBAR EDITORIAL ============ -->
+        <aside class="sidebar">
+            <div class="sidebar-top">
+                <div class="masthead">
+                    <span class="masthead-mark">※</span>
+                    <h1 class="masthead-title">Stock<em>ML</em></h1>
+                    <span class="masthead-sub">Bitácora de ventas</span>
+                </div>
+
+                <div class="edition">
+                    <span class="edition-label">Edición</span>
+                    <span class="edition-number" id="editionDate">—</span>
+                </div>
+            </div>
+
+            <nav class="nav" aria-label="Navegación principal">
+                <button class="nav-item active" data-tab="upload">
+                    <span class="nav-num">01</span>
+                    <span class="nav-label">Cargar</span>
+                    <span class="nav-arrow">→</span>
+                </button>
+                <button class="nav-item" data-tab="dashboard">
+                    <span class="nav-num">02</span>
+                    <span class="nav-label">Panorama</span>
+                    <span class="nav-arrow">→</span>
+                </button>
+                <button class="nav-item" data-tab="stock">
+                    <span class="nav-num">03</span>
+                    <span class="nav-label">Inventario</span>
+                    <span class="nav-arrow">→</span>
+                </button>
+                <button class="nav-item" data-tab="daily">
+                    <span class="nav-num">04</span>
+                    <span class="nav-label">Stock diario final</span>
+                    <span class="nav-arrow">→</span>
+                </button>
+                <button class="nav-item" data-tab="grouped">
+                    <span class="nav-num">05</span>
+                    <span class="nav-label">Stock agrupado</span>
+                    <span class="nav-arrow">→</span>
+                </button>
+                <button class="nav-item" data-tab="history">
+                    <span class="nav-num">06</span>
+                    <span class="nav-label">Archivo</span>
+                    <span class="nav-arrow">→</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <div class="ticker">
+                    <span class="ticker-label">Total acumulado</span>
+                    <span class="ticker-value" id="tickerUnits">0</span>
+                    <span class="ticker-sub">unidades · <span id="tickerSkus">0</span> skus</span>
+                </div>
+                <button class="btn-text danger" id="btnReset">
+                    <span>↺</span> Limpiar archivo
+                </button>
+                <p class="colophon">
+                    <span>vol. 1 · </span>
+                    <span id="colophonDate">—</span>
+                </p>
+            </div>
+        </aside>
+
+        <!-- ============ MAIN ============ -->
+        <main class="main">
+
+            <!-- ===== TAB 01: CARGAR ===== -->
+            <section class="tab active" id="tab-upload">
+                <header class="page-head">
+                    <div class="greeting-banner" id="greetingBanner">
+                        <span class="greeting-icon">☀</span>
+                        <h2 class="greeting-text" id="greetingText">Buenos días Mili y Giuli</h2>
+                    </div>
+                    <div class="page-meta">
+                        <span class="meta-num">01</span>
+                        <span class="meta-line"></span>
+                        <span class="meta-label">Ingreso de partes</span>
+                    </div>
+                    <h2 class="page-title">Cargá tus <em>reportes</em> de ventas</h2>
+                    <p class="page-lead">
+                        Arrastrá los archivos <code>.xlsx</code> exportados desde Mercado Libre. La aplicación analiza, agrupa por SKU padre y desglosa cada variante de color sin que tengas que tocar nada.
+                    </p>
+                </header>
+
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="fileInput" accept=".xlsx,.xls" multiple hidden>
+                    <div class="upload-decoration" aria-hidden="true">
+                        <span class="corner tl">┌</span>
+                        <span class="corner tr">┐</span>
+                        <span class="corner bl">└</span>
+                        <span class="corner br">┘</span>
+                    </div>
+                    <div class="upload-content">
+                        <div class="upload-icon">↓</div>
+                        <h3 class="upload-title">Soltá los archivos acá</h3>
+                        <p class="upload-or">— o también —</p>
+                        <button class="btn btn-primary" id="btnPickFile">Seleccionar desde el equipo</button>
+                        <p class="upload-hint">.xlsx · .xls · múltiples archivos permitidos</p>
+                    </div>
+                </div>
+
+                <div class="files-list" id="filesList"></div>
+
+                <div class="upload-actions" id="uploadActions" style="display:none;">
+                    <button class="btn btn-primary btn-lg" id="btnProcess">
+                        Procesar partes <span class="btn-arrow">→</span>
+                    </button>
+                    <button class="btn btn-text" id="btnClearFiles">Cancelar</button>
+                </div>
+
+                <div class="processing-results" id="processingResults"></div>
+
+                <!-- ===== CARGA MANUAL ===== -->
+                <article class="manual-entry-block" id="manualEntryBlock">
+                    <div class="section-head">
+                        <div class="section-head-left">
+                            <span class="section-num">✎</span>
+                            <h3 class="section-title">Carga manual de ventas</h3>
+                            <span class="section-sub">para ventas que ingresan después de los reportes</span>
+                        </div>
+                    </div>
+
+                    <!-- Catálogo de SKUs -->
+                    <div class="catalog-bar" id="catalogBar">
+                        <div class="catalog-bar-left">
+                            <span class="catalog-icon">⎔</span>
+                            <div class="catalog-info">
+                                <span class="catalog-label">Catálogo de SKUs</span>
+                                <span class="catalog-status" id="catalogStatus">Sin catálogo cargado</span>
+                            </div>
+                        </div>
+                        <div class="catalog-bar-right">
+                            <input type="file" id="catalogFileInput" accept=".xlsx,.xls" hidden>
+                            <button class="btn btn-secondary btn-sm" id="btnLoadCatalog">
+                                <span>↑</span> Cargar lista de SKUs
+                            </button>
+                            <button class="btn btn-text danger btn-sm" id="btnClearCatalog" style="display:none;">
+                                <span>✕</span> Quitar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="manual-entry-form" id="manualEntryForm">
+                        <div class="manual-field manual-field-sku">
+                            <label for="manualSku">SKU</label>
+                            <div class="autocomplete-wrap" id="autocompleteWrap">
+                                <input type="text" id="manualSku" class="manual-input" placeholder="Buscá en el catálogo o escribí un SKU..." autocomplete="off">
+                                <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
+                            </div>
+                        </div>
+                        <div class="manual-field">
+                            <label for="manualProduct">Producto</label>
+                            <input type="text" id="manualProduct" class="manual-input" placeholder="Nombre del producto" readonly>
+                        </div>
+                        <div class="manual-field manual-field-short">
+                            <label for="manualPrice">Precio</label>
+                            <input type="text" id="manualPrice" class="manual-input" placeholder="—" readonly>
+                        </div>
+                        <div class="manual-field manual-field-short">
+                            <label for="manualQty">Cantidad</label>
+                            <input type="number" id="manualQty" class="manual-input" placeholder="1" min="1" value="1">
+                        </div>
+                        <div class="manual-field manual-field-short">
+                            <label for="manualShipping">Envío</label>
+                            <select id="manualShipping" class="manual-input select">
+                                <option value="full">Full</option>
+                                <option value="flex">Flex</option>
+                                <option value="colecta">Colecta</option>
+                                <option value="correo">Correo</option>
+                                <option value="otros">Otros</option>
+                            </select>
+                        </div>
+                        <div class="manual-field manual-field-btn">
+                            <button class="btn btn-primary" id="btnManualAdd">
+                                <span>+</span> Agregar venta
+                            </button>
+                        </div>
+                    </div>
+                    <div class="manual-recent" id="manualRecent"></div>
+                </article>
+            </section>
+
+            <!-- ===== TAB 02: PANORAMA ===== -->
+            <section class="tab" id="tab-dashboard">
+                <header class="page-head">
+                    <div class="page-meta">
+                        <span class="meta-num">02</span>
+                        <span class="meta-line"></span>
+                        <span class="meta-label">Vista general</span>
+                    </div>
+                    <h2 class="page-title">Panorama <em>operativo</em></h2>
+                    <p class="page-lead">Cifras consolidadas de todos los reportes procesados.</p>
+                </header>
+
+                <div class="empty-state" id="dashboardEmpty">
+                    <div class="empty-mark">∅</div>
+                    <h3>Aún no hay registros</h3>
+                    <p>Cargá tu primer reporte en la sección <strong>Cargar</strong>.</p>
+                </div>
+
+                <div class="dashboard-content" id="dashboardContent" style="display:none;">
+
+                    <div class="hero-kpi">
+                        <div class="hero-kpi-side">
+                            <span class="hero-kpi-label">Unidades vendidas</span>
+                            <span class="hero-kpi-period" id="heroPeriod">en el período cargado</span>
+                        </div>
+                        <div class="hero-kpi-number">
+                            <span class="hero-kpi-value" id="kpiTotalUnits">0</span>
+                        </div>
+                        <div class="hero-kpi-side right">
+                            <span class="hero-kpi-stat">
+                                <span id="kpiTotalSales">0</span>
+                                <em>ventas únicas</em>
+                            </span>
+                            <span class="hero-kpi-stat">
+                                <span id="kpiUniqueSkus">0</span>
+                                <em>SKUs activos</em>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="kpi-row">
+                        <div class="kpi-mini">
+                            <span class="kpi-mini-label">Facturación</span>
+                            <span class="kpi-mini-value" id="kpiRevenue">$0</span>
+                            <span class="kpi-mini-sub">ARS</span>
+                        </div>
+                        <div class="kpi-mini">
+                            <span class="kpi-mini-label">Variantes</span>
+                            <span class="kpi-mini-value" id="kpiVariants">0</span>
+                            <span class="kpi-mini-sub">colores activos</span>
+                        </div>
+                        <div class="kpi-mini">
+                            <span class="kpi-mini-label">Promedio diario</span>
+                            <span class="kpi-mini-value" id="kpiAvgDaily">0</span>
+                            <span class="kpi-mini-sub">unidades/día</span>
+                        </div>
+                        <div class="kpi-mini alert">
+                            <span class="kpi-mini-label">Canceladas</span>
+                            <span class="kpi-mini-value" id="kpiCancelled">0</span>
+                            <span class="kpi-mini-sub">no contabilizadas</span>
+                        </div>
+                    </div>
+
+                    <div class="chart-block">
+                        <div class="chart-head">
+                            <span class="chart-num">Fig. I</span>
+                            <h3 class="chart-title">Ventas por jornada</h3>
+                            <span class="chart-meta">unidades despachadas</span>
+                        </div>
+                        <div class="chart-wrap chart-wrap-tall"><canvas id="chartDaily"></canvas></div>
+                    </div>
+
+                    <div class="chart-grid-2">
+                        <div class="chart-block">
+                            <div class="chart-head">
+                                <span class="chart-num">Fig. II</span>
+                                <h3 class="chart-title">Logística</h3>
+                                <span class="chart-meta">por método de envío</span>
+                            </div>
+                            <div class="chart-wrap"><canvas id="chartShipping"></canvas></div>
+                            <div class="chart-legend" id="shippingLegend"></div>
+                        </div>
+
+                        <div class="chart-block">
+                            <div class="chart-head">
+                                <span class="chart-num">Fig. III</span>
+                                <h3 class="chart-title">Ranking de productos</h3>
+                                <span class="chart-meta">top 10 SKUs</span>
+                            </div>
+                            <div class="chart-wrap"><canvas id="chartTopSkus"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== TAB 03: INVENTARIO ===== -->
+            <section class="tab" id="tab-stock">
+                <header class="page-head">
+                    <div class="page-meta">
+                        <span class="meta-num">03</span>
+                        <span class="meta-line"></span>
+                        <span class="meta-label">Detalle por código</span>
+                    </div>
+                    <h2 class="page-title">Inventario <em>consolidado</em></h2>
+                    <p class="page-lead">SKUs agrupados por padre, con desglose por variante y método de despacho.</p>
+                </header>
+
+                <div class="toolbar">
+                    <div class="search-wrap">
+                        <span class="search-icon">⌕</span>
+                        <input type="text" id="searchSku" placeholder="Buscar SKU o producto..." class="search-input">
+                    </div>
+                    <select id="filterShipping" class="select">
+                        <option value="all">Todos los envíos</option>
+                        <option value="full">Mercado Envíos Full</option>
+                        <option value="flex">Mercado Envíos Flex</option>
+                        <option value="colecta">Colecta</option>
+                    </select>
+                    <button class="btn btn-secondary" id="btnExport">
+                        <span>↗</span> Exportar a Excel
+                    </button>
+                </div>
+
+                <div class="empty-state" id="stockEmpty">
+                    <div class="empty-mark">∅</div>
+                    <h3>Sin inventario procesado</h3>
+                    <p>Cargá reportes para empezar.</p>
+                </div>
+
+                <div class="stock-tables" id="stockTables" style="display:none;">
+
+                    <article class="section-block">
+                        <div class="section-head">
+                            <div class="section-head-left">
+                                <span class="section-num">§ A</span>
+                                <h3 class="section-title">Productos con variantes</h3>
+                                <span class="section-sub">agrupados por SKU padre</span>
+                            </div>
+                            <span class="badge" id="badgeWithVariants">0</span>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="data-table" id="tableSkus">
+                                <thead>
+                                    <tr>
+                                        <th class="th-sku">SKU Padre</th>
+                                        <th class="th-prod">Producto</th>
+                                        <th class="th-num">Total</th>
+                                        <th>Desglose por color</th>
+                                        <th>Despacho</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </article>
+
+                    <article class="section-block">
+                        <div class="section-head">
+                            <div class="section-head-left">
+                                <span class="section-num">§ B</span>
+                                <h3 class="section-title">Productos sin variante</h3>
+                                <span class="section-sub">SKU único</span>
+                            </div>
+                            <span class="badge" id="badgeNoVariants">0</span>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="data-table" id="tableSimple">
+                                <thead>
+                                    <tr>
+                                        <th class="th-sku">SKU</th>
+                                        <th class="th-prod">Producto</th>
+                                        <th class="th-num">Total</th>
+                                        <th>Despacho</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </article>
+
+                    <article class="section-block">
+                        <div class="section-head">
+                            <div class="section-head-left">
+                                <span class="section-num">§ C</span>
+                                <h3 class="section-title">Combos / Kits</h3>
+                                <span class="section-sub">agrupaciones especiales</span>
+                            </div>
+                            <span class="badge" id="badgeCombos">0</span>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="data-table" id="tableCombos">
+                                <thead>
+                                    <tr>
+                                        <th class="th-sku">SKU / Descripción</th>
+                                        <th class="th-prod">Producto</th>
+                                        <th class="th-num">Total</th>
+                                        <th>Despacho</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </article>
+
+                    <article class="section-block alert-block">
+                        <div class="section-head">
+                            <div class="section-head-left">
+                                <span class="section-num alert">§ D</span>
+                                <h3 class="section-title">Cancelaciones</h3>
+                                <span class="section-sub">excluidas del conteo principal</span>
+                            </div>
+                            <span class="badge danger" id="badgeCancelled">0</span>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="data-table" id="tableCancelled">
+                                <thead>
+                                    <tr>
+                                        <th class="th-sku">SKU</th>
+                                        <th class="th-prod">Producto</th>
+                                        <th class="th-num">Unidades</th>
+                                        <th>Motivo</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <!-- ===== TAB 04: PARTE DIARIO ===== -->
+            <section class="tab" id="tab-daily">
+                <header class="page-head no-print">
+                    <div class="page-meta">
+                        <span class="meta-num">04</span>
+                        <span class="meta-line"></span>
+                        <span class="meta-label">Resumen acumulado</span>
+                    </div>
+                    <h2 class="page-title">Stock diario <em>final</em></h2>
+                    <p class="page-lead">Todos los SKU unificados en una sola lista con el total acumulado. Imprimible y copiable para volcar al sistema propio.</p>
+                </header>
+
+                <div class="daily-controls no-print">
+                    <div class="daily-actions">
+                        <button class="btn btn-secondary" id="btnPrintDaily">
+                            <span>⎙</span> Imprimir
+                        </button>
+                        <button class="btn btn-primary" id="btnCopyDaily">
+                            <span>⎘</span> Copiar lista
+                        </button>
+                    </div>
+                </div>
+
+                <div class="empty-state no-print" id="dailyEmpty">
+                    <div class="empty-mark">∅</div>
+                    <h3>Sin partes para mostrar</h3>
+                    <p>Cargá reportes con fecha en la sección <strong>Cargar</strong>.</p>
+                </div>
+
+                <!-- Hoja imprimible -->
+                <article class="daily-sheet" id="dailySheet" style="display:none;">
+                    <header class="sheet-head">
+                        <div class="sheet-head-left">
+                            <h3 class="sheet-title">Stock diario final</h3>
+                            <p class="sheet-meta">
+                                <span>Período: <strong id="sheetDate">—</strong></span>
+                                <span>·</span>
+                                <span>Generado: <strong id="sheetGenerated">—</strong></span>
+                            </p>
+                        </div>
+                        <div class="sheet-head-right">
+                            <div class="sheet-stat">
+                                <span class="sheet-stat-label">Unidades</span>
+                                <span class="sheet-stat-value" id="sheetTotalUnits">0</span>
+                            </div>
+                            <div class="sheet-stat">
+                                <span class="sheet-stat-label">SKUs</span>
+                                <span class="sheet-stat-value" id="sheetTotalSkus">0</span>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div class="sheet-body">
+                        <table class="sheet-table" id="sheetTable">
+                            <thead>
+                                <tr>
+                                    <th class="sheet-col-sku">SKU</th>
+                                    <th class="sheet-col-prod">Producto</th>
+                                    <th class="sheet-col-qty">Cant.</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+
+                    <footer class="sheet-foot">
+                        <span>Stock ML · Bitácora de ventas</span>
+                        <span id="sheetFootStats">—</span>
+                    </footer>
+                </article>
+            </section>
+
+            <!-- ===== TAB 05: STOCK AGRUPADO ===== -->
+            <section class="tab" id="tab-grouped">
+                <header class="page-head">
+                    <div class="page-meta">
+                        <span class="meta-num">05</span>
+                        <span class="meta-line"></span>
+                        <span class="meta-label">Total por SKU</span>
+                    </div>
+                    <h2 class="page-title">Stock <em>agrupado</em></h2>
+                    <p class="page-lead">Total de unidades vendidas por SKU, sin distinguir canal de venta ni tipo de publicación. Cada código aparece una sola vez con su cantidad acumulada.</p>
+                </header>
+
+                <div class="toolbar">
+                    <div class="search-wrap">
+                        <span class="search-icon">⌕</span>
+                        <input type="text" id="searchGrouped" placeholder="Buscar SKU o producto..." class="search-input">
+                    </div>
+                    <button class="btn btn-secondary" id="btnExportGrouped">
+                        <span>↗</span> Exportar a Excel
+                    </button>
+                    <button class="btn btn-secondary" id="btnCopyGrouped">
+                        <span>⎘</span> Copiar lista
+                    </button>
+                </div>
+
+                <div class="empty-state" id="groupedEmpty">
+                    <div class="empty-mark">∅</div>
+                    <h3>Sin datos para mostrar</h3>
+                    <p>Cargá reportes en la sección <strong>Cargar</strong>.</p>
+                </div>
+
+                <div id="groupedContent" style="display:none;">
+                    <div class="grouped-summary">
+                        <div class="grouped-summary-stat">
+                            <span class="grouped-summary-label">Total unidades</span>
+                            <span class="grouped-summary-value" id="groupedTotalUnits">0</span>
+                        </div>
+                        <div class="grouped-summary-stat">
+                            <span class="grouped-summary-label">SKUs únicos</span>
+                            <span class="grouped-summary-value" id="groupedTotalSkus">0</span>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="data-table" id="tableGrouped">
+                            <thead>
+                                <tr>
+                                    <th class="th-rank">#</th>
+                                    <th class="th-sku">SKU</th>
+                                    <th class="th-prod">Producto</th>
+                                    <th class="th-num">Total vendido</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== TAB 06: ARCHIVO ===== -->
+            <section class="tab" id="tab-history">
+                <header class="page-head">
+                    <div class="page-meta">
+                        <span class="meta-num">06</span>
+                        <span class="meta-line"></span>
+                        <span class="meta-label">Bitácora de cargas</span>
+                    </div>
+                    <h2 class="page-title">Archivo <em>histórico</em></h2>
+                    <p class="page-lead">Registro de todos los reportes procesados.</p>
+                </header>
+
+                <div class="empty-state" id="historyEmpty">
+                    <div class="empty-mark">∅</div>
+                    <h3>Archivo vacío</h3>
+                    <p>Tus cargas aparecerán acá.</p>
+                </div>
+                <div class="history-list" id="historyList" style="display:none;"></div>
+            </section>
+        </main>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="modal" id="confirmModal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-mark">!</div>
+            <h3 id="modalTitle">¿Estás seguro?</h3>
+            <p id="modalMessage">Esta acción no se puede deshacer.</p>
+            <div class="modal-actions">
+                <button class="btn btn-text" id="modalCancel">Cancelar</button>
+                <button class="btn btn-danger" id="modalConfirm">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
